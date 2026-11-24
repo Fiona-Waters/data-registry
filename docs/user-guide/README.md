@@ -4,7 +4,7 @@ This guide is for a user of Red Hat OpenShift AI (RHOAI) who wants to call the D
 
 The guide focuses on API consumers. For registering and browsing assets in the dashboard, see the [Data Registry dashboard documentation](https://github.com/opendatahub-io/odh-dashboard/tree/main/packages/data-registry/docs). For a hands-on example under review, see the [Data Registry walkthrough preview](https://github.com/briangallagher/red-hat-ai-examples/blob/codex/data-registry-rhoai-3.6/examples/data-registry/README.md).
 
-For operation details and schemas, use the [OpenAPI contract](../../api-contract/data-registry-api.yaml) or the [generated API reference HTML](../../api-contract/data-registry-api.html). GitHub shows the HTML source; download the file and open it in a browser to view the rendered reference.
+For operation details and schemas, use the [OpenAPI contract](../../api-contract/data-registry-api.yaml) or the [generated API reference HTML](../../api-contract/data-registry-api.html). GitHub shows the HTML source; download both files into the same directory and open the HTML in a browser to view the rendered reference and use its specification link.
 
 ## Topics
 

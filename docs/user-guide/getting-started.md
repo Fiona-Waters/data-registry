@@ -19,4 +19,4 @@ The supported API URL and the way to discover it must be documented for each sup
 ## Next steps
 
 - Learn how to [authenticate](authentication.md) and [request access](authorization.md).
-- Follow the [full Data Registry customer walkthrough](https://github.com/red-hat-data-services/red-hat-ai-examples/pull/122) for a step-by-step example.
+- Follow the [Data Registry walkthrough preview](https://github.com/briangallagher/red-hat-ai-examples/blob/codex/data-registry-rhoai-3.6/examples/data-registry/README.md) for a step-by-step example. The walkthrough is under review and has not yet been published on the upstream default branch.

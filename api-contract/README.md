@@ -9,8 +9,10 @@ marked `x-rhoai-extension: true`; this does not imply full Iceberg REST
 compatibility. OpenAPI-generated clients may help with experimentation, but are
 not supported product SDKs.
 
-[`data-registry-api.html`](data-registry-api.html) is the generated reference.
-Regenerate and validate it with the pinned Redocly CLI:
+[`data-registry-api.html`](data-registry-api.html) is the generated reference. GitHub
+shows its source; download the file and open it in a browser to view the rendered
+reference. Use Node.js 24.4.1 and npm 10 or later to regenerate and validate it
+with the pinned Redocly CLI:
 
 ```bash
 npm ci

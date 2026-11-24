@@ -7,7 +7,7 @@ The repository contains the OpenAPI contract and a customer-facing user guide.
 ## Start here
 
 - [Data Registry API user guide](docs/user-guide/README.md) — getting started, authentication, authorization, and auditing and logging.
-- [OpenAPI contract](api-contract/data-registry-api.yaml) and [rendered API reference](api-contract/data-registry-api.html).
+- [OpenAPI contract](api-contract/data-registry-api.yaml) and [generated API reference HTML](api-contract/data-registry-api.html). GitHub shows the HTML source; download the file and open it in a browser to view the rendered reference.
 - [Documentation index](docs/README.md) — the documentation map and related resources.
 
 ## Current implementation
@@ -17,7 +17,7 @@ The current API implementation is part of the [Open Data Hub Feast repository](h
 ## Related customer documentation
 
 - [Data Registry dashboard documentation](https://github.com/opendatahub-io/odh-dashboard/tree/main/packages/data-registry/docs) covers the dashboard experience. This repository focuses on programmatic API use.
-- [Data Registry walkthrough in red-hat-ai-examples](https://github.com/red-hat-data-services/red-hat-ai-examples/pull/122) is the longer step-by-step customer example. This guide will provide a concise API-oriented starting point and link to the walkthrough for a fuller exercise.
+- [Data Registry walkthrough preview in red-hat-ai-examples](https://github.com/briangallagher/red-hat-ai-examples/blob/codex/data-registry-rhoai-3.6/examples/data-registry/README.md) is the longer step-by-step example. It is still under review and is not yet published on the upstream default branch.
 
 ## Documentation status
 

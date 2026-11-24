@@ -3,11 +3,13 @@ info:
   title: RHOAI Data Registry API
   version: 0.9.0
   description: |
-    The RHOAI Data Registry exposes an **Iceberg REST-compatible API** for
+    The RHOAI Data Registry exposes an **Iceberg REST-shaped API** for
     registering, discovering, and managing data assets across OpenShift AI projects.
 
-    Standard Iceberg clients (PyIceberg, Spark, Trino, DuckDB) can connect directly —
-    no proprietary SDK required.
+    This contract covers bootstrap configuration, namespaces, table listing,
+    table metadata retrieval, and existence checks. Declared write operations
+    have limited support; for example, `updateTable` documents only property
+    actions. Do not assume every operation required by an Iceberg client works.
 
     The API uses a three-level namespace model:
     ```
@@ -21,8 +23,8 @@ info:
 
     The Data Registry exposes two complementary API surfaces on the same server:
 
-    1. **Iceberg REST** — Standard Iceberg REST Catalog endpoints. Any compliant client
-       (PyIceberg, Spark, Trino, DuckDB) can connect without modification.
+    1. **Iceberg REST-shaped** — Catalog discovery and metadata operations with
+       limited write support; this is not a claim of full client compatibility.
     2. **RHOAI Extensions** — Additive endpoints for volume management, multi-format asset
        registration, and search. These do not break spec clients.
 
@@ -30,7 +32,10 @@ info:
 
     All endpoints require a Bearer token (`Authorization: Bearer <token>`).
     A kube-rbac-proxy sidecar authenticates via Kubernetes TokenReview and authorizes
-    via SubjectAccessReview (SAR) against the RHOAI project extracted from the URL path.
+    via SubjectAccessReview (SAR) for project-prefixed routes. The unprefixed
+    `/v1/config` bootstrap route has no project in its path; its authorization
+    behavior must be verified for each supported deployment, including calls
+    without the optional `warehouse` parameter.
 
     ## Authorization
 
@@ -39,7 +44,8 @@ info:
 
     ## Error Responses
 
-    All endpoints return errors in a consistent Iceberg REST format:
+    Error response bodies use a consistent Iceberg REST format (except HEAD,
+    which has no response body):
     `{"error": {"message": "...", "type": "...", "code": N}}`
   contact:
     name: RHOAI Data Strategy Team
@@ -218,13 +224,13 @@ paths:
         - $ref: '#/components/parameters/collection'
       responses:
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: '#/components/responses/UnauthorizedHead'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: '#/components/responses/ForbiddenHead'
         '204':
           description: Collection exists
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: '#/components/responses/NotFoundHead'
 
     delete:
       operationId: dropNamespace
@@ -369,13 +375,13 @@ paths:
         - $ref: '#/components/parameters/table'
       responses:
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: '#/components/responses/UnauthorizedHead'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: '#/components/responses/ForbiddenHead'
         '204':
           description: Table exists
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: '#/components/responses/NotFoundHead'
 
     post:
       operationId: updateTable
@@ -546,13 +552,13 @@ paths:
         - $ref: '#/components/parameters/volume'
       responses:
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: '#/components/responses/UnauthorizedHead'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: '#/components/responses/ForbiddenHead'
         '204':
           description: Volume exists
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: '#/components/responses/NotFoundHead'
 
     patch:
       operationId: updateVolume
@@ -571,6 +577,8 @@ paths:
             schema:
               $ref: '#/components/schemas/UpdateVolumeRequest'
       responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -644,8 +652,9 @@ paths:
       operationId: createGenericTable
       summary: Register table with extended metadata
       description: |
-        Registers a table asset with format-agnostic metadata. Supports any data
-        format (iceberg, parquet, csv, postgresql, etc.).
+        Registers a table asset with format-agnostic metadata. Accepted `format`
+        values are `iceberg`, `parquet`, `csv`, `delta`, `postgresql`, `milvus`,
+        and `other`. Use `other` when the format is not named in this list.
 
         The asset owner is assigned by the server from the authenticated creator identity.
         The authentication proxy may forward that identity internally as `X-User` or
@@ -740,6 +749,8 @@ paths:
             schema:
               $ref: '#/components/schemas/UpdateGenericTableRequest'
       responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -872,9 +883,10 @@ paths:
 
         **Type filter (`asset_type` only).** There is no `type` query parameter.
         Case-insensitive. Aliases: `dataset` → tables; `iceberg_table` → tables
-        whose format is `iceberg`. Unknown `asset_type` values return HTTP 200
-        with `results: []` (not 400). Result `type` is only `table`, `volume`,
-        or `collection`.
+        whose format is `iceberg`. Unknown `asset_type` values produce no hits:
+        page 1 returns HTTP 200 with `results: []`, while page greater than 1
+        returns HTTP 400 because there are no results to paginate. Result
+        `type` is only `table`, `volume`, or `collection`.
 
         **Collection filter.** `namespace` and `namespaces` are aliases for
         SavedDataset `collection`. Case-insensitive exact match. Omitted or
@@ -893,7 +905,9 @@ paths:
 
         **Pagination / sort.** `page` (1-based, default 1). `limit` (default 50,
         max 500). `page_size` is an alias of `limit`; when both are sent,
-        `page_size` wins. `sort_by` is `score` (default) or `name`. `sort_order`
+        `page_size` wins after both supplied values pass validation. For example,
+        `page_size=25&limit=501` returns 400 even though `page_size` takes
+        precedence for valid values. `sort_by` is `score` (default) or `name`. `sort_order`
         is `asc` or `desc`; when omitted, `desc` for `score` and `asc` for
         `name`. Name sort is case-insensitive.
 
@@ -943,7 +957,8 @@ paths:
             Optional type filter. Not a closed enum. Known values: `table`,
             `volume`, `collection`, `dataset` (alias of `table`),
             `iceberg_table` (tables with format `iceberg`). Unknown values
-            yield HTTP 200 and an empty `results` list.
+            yield HTTP 200 and an empty `results` list on page 1; page greater
+            than 1 returns 400 because there are no results to paginate.
         - name: properties
           in: query
           schema:
@@ -991,8 +1006,9 @@ paths:
             minimum: 1
             maximum: 500
           description: |
-            Results per page. When both `page_size` and `limit` are sent,
-            `page_size` wins.
+            Results per page. Both supplied values are validated before
+            precedence applies. When both are valid, `page_size` wins;
+            `page_size=25&limit=501` returns 400.
         - name: limit
           in: query
           schema:
@@ -1000,7 +1016,10 @@ paths:
             minimum: 1
             maximum: 500
             default: 50
-          description: Results per page when `page_size` is omitted
+          description: |
+            Results per page when `page_size` is omitted. A supplied `limit`
+            is validated even when `page_size` is present; values above 500
+            return 400.
       responses:
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -1014,6 +1033,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SearchResponse'
+              example:
+                query: ''
+                results:
+                  - type: table
+                    namespace: [default]
+                    name: sample-table
+                    description: null
+                    properties: {}
+                    score: 0
+                pagination:
+                  page: 1
+                  limit: 50
+                  totalCount: 1
+                  totalPages: 1
 
 # =============================================================================
 # Components
@@ -1099,6 +1132,15 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
 
+    NotFoundHead:
+      description: Resource not found; HEAD responses have no body
+
+    UnauthorizedHead:
+      description: Missing or invalid authentication token; HEAD responses have no body
+
+    ForbiddenHead:
+      description: Authenticated caller is not authorized; HEAD responses have no body
+
   schemas:
     # ----- Connection Reference -----
 
@@ -1109,6 +1151,9 @@ components:
         use type and secret_name.
       discriminator:
         propertyName: type
+        mapping:
+          dch: '#/components/schemas/DchConnectionRef'
+          secret: '#/components/schemas/SecretConnectionRef'
       oneOf:
         - $ref: '#/components/schemas/DchConnectionRef'
         - $ref: '#/components/schemas/SecretConnectionRef'
@@ -1266,6 +1311,9 @@ components:
 
     IcebergField:
       type: object
+      description: |
+        Current catalog metadata uses primitive Iceberg type names as strings.
+        Nested struct, list, and map type objects are not supported by this schema.
       required: [id, name, required, type]
       properties:
         id:
@@ -1276,6 +1324,7 @@ components:
           type: boolean
         type:
           type: string
+          description: Primitive Iceberg type name, such as string or long
 
     IcebergSchema:
       type: object
@@ -1580,7 +1629,8 @@ components:
         The asset name, format, and server-managed identity fields cannot be cleared. Send null
         to clear a nullable field. Use `remove_labels` to remove labels and `remove_properties`
         to remove custom property keys. If a property key is present in both `properties` and
-        `remove_properties`, removal takes precedence.
+        `remove_properties`, the request is rejected with 400 before the asset
+        is saved.
       properties:
         format:
           type: string

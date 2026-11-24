@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "api:lint": "redocly lint api-contract/data-registry-api.yaml",
-    "api:docs": "redocly build-docs api-contract/data-registry-api.yaml --output api-contract/data-registry-api.html"
+    "api:docs": "redocly build-docs api-contract/data-registry-api.yaml --output api-contract/data-registry-api.html --template api-contract/template.hbs"
   },
   "devDependencies": {
     "@redocly/cli": "2.44.1"

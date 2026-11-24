@@ -17,7 +17,7 @@ The current API implementation is part of the [Open Data Hub Feast repository](h
 ## Related customer documentation
 
 - [Data Registry dashboard documentation](https://github.com/opendatahub-io/odh-dashboard/tree/main/packages/data-registry/docs) covers the dashboard experience. This repository focuses on programmatic API use.
-- [Data Registry walkthrough preview in red-hat-ai-examples](https://github.com/briangallagher/red-hat-ai-examples/blob/codex/data-registry-rhoai-3.6/examples/data-registry/README.md) is the longer step-by-step example. It is still under review and is not yet published on the upstream default branch.
+- [Data Registry examples in red-hat-ai-examples](https://github.com/red-hat-data-services/red-hat-ai-examples/tree/main/examples/data-registry) provide the longer step-by-step customer walkthrough.
 
 ## Documentation status
 

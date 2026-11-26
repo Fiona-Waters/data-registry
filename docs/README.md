@@ -10,9 +10,9 @@ This documentation is for people using the RHOAI Data Registry and its API.
 ## User guide
 
 - [API user guide](user-guide/README.md) — overview and links to the consumer topics.
+- [Concepts and terminology](user-guide/concepts-terminologies.md) — projects, collections, assets, and connections.
 - [Getting started](user-guide/getting-started.md) — API endpoint and first-request guidance.
-- [Authentication](user-guide/authentication.md) — using an RHOAI/OpenShift bearer token.
-- [Authorization](user-guide/authorization.md) — access to registry operations and project data.
+- [Authentication and authorization](user-guide/auth.md) — tokens, project access, and sharing.
 - [Auditing and logging](user-guide/auditing-and-logging.md) — what users and administrators can expect to see.
 
 Some user-guide pages are placeholders while release-specific instructions are confirmed for customer-facing documentation.

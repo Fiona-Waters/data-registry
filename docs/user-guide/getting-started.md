@@ -18,5 +18,5 @@ The supported API URL and the way to discover it must be documented for each sup
 
 ## Next steps
 
-- Learn how to [authenticate](authentication.md) and [request access](authorization.md).
+- Learn how to [authenticate and share project access](auth.md).
 - Follow the [Data Registry customer walkthrough](https://github.com/red-hat-data-services/red-hat-ai-examples/tree/main/examples/data-registry) for a step-by-step example.
